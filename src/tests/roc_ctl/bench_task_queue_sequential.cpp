@@ -19,10 +19,10 @@ namespace {
 const core::nanoseconds_t MaxDelay = 100 * core::Millisecond;
 
 enum {
-    NumScheduleIterations = 2000000,
-    NumScheduleAfterIterations = 20000,
-    NumThreads = 4,
-    BatchSize = 1000
+    NumScheduleIterations = 2000,
+    NumScheduleAfterIterations = 200,
+    NumThreads = 8,
+    BatchSize = 100
 };
 
 class NoopExecutor : public ControlTaskExecutor<NoopExecutor> {
@@ -75,19 +75,20 @@ BENCHMARK_REGISTER_F(BM_QueueSequential, Schedule)
     ->Unit(benchmark::kMicrosecond);
 
 BENCHMARK_DEFINE_F(BM_QueueSequential, ScheduleAt)(benchmark::State& state) {
-    NoopExecutor::Task* tasks = new NoopExecutor::Task[NumScheduleIterations];
+    NoopExecutor::Task* tasks = new NoopExecutor::Task[NumScheduleAfterIterations];
     size_t n_task = 0;
 
     while (state.KeepRunningBatch(BatchSize)) {
         for (int n = 0; n < BatchSize; n++) {
             queue.schedule_at(tasks[n_task],
-                              core::timestamp(core::ClockMonotonic) + core::Millisecond * n,
+                              core::timestamp(core::ClockMonotonic)
+                                  + core::Millisecond * n_task / 1000,
                               executor, &completer);
             n_task++;
         }
     }
 
-    for (int n = 0; n < NumScheduleIterations; n++) {
+    for (int n = 0; n < NumScheduleAfterIterations; n++) {
         queue.wait(tasks[n]);
     }
 
