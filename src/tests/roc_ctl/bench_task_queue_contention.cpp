@@ -19,7 +19,7 @@ namespace {
 enum {
     NumScheduleIterations = 2000000,
     NumScheduleAfterIterations = 20000,
-    NumThreads = 8,
+    NumThreads = 2,
     BatchSize = 1000
 };
 
