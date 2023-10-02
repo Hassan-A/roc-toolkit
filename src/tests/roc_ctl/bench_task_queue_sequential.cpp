@@ -92,7 +92,6 @@ BENCHMARK_DEFINE_F(BM_QueueSequential, ScheduleAt)(benchmark::State& state) {
     }
 
     delete[] tasks;
-    delete[] delays;
 }
 
 BENCHMARK_REGISTER_F(BM_QueueSequential, ScheduleAt)
