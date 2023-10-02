@@ -74,6 +74,37 @@ BENCHMARK_REGISTER_F(BM_QueueSequential, Schedule)
     ->Iterations(NumScheduleIterations)
     ->Unit(benchmark::kMicrosecond);
 
+BENCHMARK_DEFINE_F(BM_QueueSequential, ScheduleAt)(benchmark::State& state) {
+    NoopExecutor::Task* tasks = new NoopExecutor::Task[NumScheduleIterations];
+    core::nanoseconds_t* delays = new core::nanoseconds_t[NumScheduleIterations];
+    size_t n_task = 0;
+
+    for (int n = 0; n < NumScheduleIterations; n++) {
+        delays[n] = core::fast_random(0, MaxDelay);
+    }
+
+    while (state.KeepRunningBatch(BatchSize)) {
+        for (int n = 0; n < BatchSize; n++) {
+            queue.schedule_at(tasks[n_task],
+                              core::timestamp(core::ClockMonotonic) + delays[n_task],
+                              executor, &completer);
+            n_task++;
+        }
+    }
+
+    for (int n = 0; n < NumScheduleIterations; n++) {
+        queue.wait(tasks[n]);
+    }
+
+    delete[] tasks;
+    delete[] delays;
+}
+
+BENCHMARK_REGISTER_F(BM_QueueSequential, ScheduleAt)
+    ->ThreadRange(1, NumThreads)
+    ->Iterations(NumScheduleIterations)
+    ->Unit(benchmark::kMicrosecond);
+
 } // namespace
 } // namespace ctl
 } // namespace roc
