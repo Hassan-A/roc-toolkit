@@ -78,11 +78,15 @@ BENCHMARK_DEFINE_F(BM_QueueSequential, ScheduleAt)(benchmark::State& state) {
     NoopExecutor::Task* tasks = new NoopExecutor::Task[NumScheduleAfterIterations];
     size_t n_task = 0;
 
+    core::nanoseconds_t* delays = new core::nanoseconds_t[NumScheduleAfterIterations];
+    for (int n = 0; n < NumScheduleAfterIterations; n++) {
+        delays[n] = core::fast_random(0, MaxDelay);
+    }
+
     while (state.KeepRunningBatch(BatchSize)) {
         for (int n = 0; n < BatchSize; n++) {
             queue.schedule_at(tasks[n_task],
-                              core::timestamp(core::ClockMonotonic)
-                                  + core::Millisecond * n_task / 1000,
+                              core::timestamp(core::ClockMonotonic) + delays[n_task],
                               executor, &completer);
             n_task++;
         }
@@ -93,6 +97,7 @@ BENCHMARK_DEFINE_F(BM_QueueSequential, ScheduleAt)(benchmark::State& state) {
     }
 
     delete[] tasks;
+    delete[] delays;
 }
 
 BENCHMARK_REGISTER_F(BM_QueueSequential, ScheduleAt)
