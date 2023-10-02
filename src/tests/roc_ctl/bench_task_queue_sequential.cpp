@@ -19,7 +19,7 @@ namespace {
 const core::nanoseconds_t MaxDelay = 100 * core::Millisecond;
 
 enum {
-    NumScheduleIterations = 2000000,
+    NumScheduleIterations = 20000,
     NumScheduleAfterIterations = 20000,
     NumThreads = 2,
     BatchSize = 1000
