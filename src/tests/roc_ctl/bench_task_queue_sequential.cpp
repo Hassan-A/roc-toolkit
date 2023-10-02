@@ -21,7 +21,7 @@ const core::nanoseconds_t MaxDelay = 100 * core::Millisecond;
 enum {
     NumScheduleIterations = 2000000,
     NumScheduleAfterIterations = 20000,
-    NumThreads = 2,
+    NumThreads = 4,
     BatchSize = 1000
 };
 
@@ -76,17 +76,13 @@ BENCHMARK_REGISTER_F(BM_QueueSequential, Schedule)
 
 BENCHMARK_DEFINE_F(BM_QueueSequential, ScheduleAt)(benchmark::State& state) {
     NoopExecutor::Task* tasks = new NoopExecutor::Task[NumScheduleIterations];
-    core::nanoseconds_t* delays = new core::nanoseconds_t[NumScheduleIterations];
     size_t n_task = 0;
-
-    for (int n = 0; n < NumScheduleIterations; n++) {
-        delays[n] = core::fast_random(0, MaxDelay);
-    }
 
     while (state.KeepRunningBatch(BatchSize)) {
         for (int n = 0; n < BatchSize; n++) {
             queue.schedule_at(tasks[n_task],
-                              core::timestamp(core::ClockMonotonic) + delays[n_task],
+                              core::timestamp(core::ClockMonotonic)
+                                  + core::Millisecond * n,
                               executor, &completer);
             n_task++;
         }
@@ -97,7 +93,6 @@ BENCHMARK_DEFINE_F(BM_QueueSequential, ScheduleAt)(benchmark::State& state) {
     }
 
     delete[] tasks;
-    delete[] delays;
 }
 
 BENCHMARK_REGISTER_F(BM_QueueSequential, ScheduleAt)
