@@ -50,7 +50,7 @@ struct BM_QueueSequential : benchmark::Fixture {
 BENCHMARK_DEFINE_F(BM_QueueSequential, Schedule)(benchmark::State& state) {
     NoopExecutor::Task* tasks = new NoopExecutor::Task[NumScheduleIterations];
 
-    for (auto _ : state) {
+    while (state.KeepRunning()) {
         for (int n = 0; n < NumScheduleIterations; n++) {
             queue.schedule(tasks[n], executor, &completer);
         }
