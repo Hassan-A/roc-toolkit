@@ -21,7 +21,7 @@ const core::nanoseconds_t MaxDelay = 100 * core::Millisecond;
 enum {
     NumScheduleIterations = 2000000,
     NumScheduleAfterIterations = 20000,
-    NumThreads = 2,
+    NumThreads = 4,
     BatchSize = 1000
 };
 
