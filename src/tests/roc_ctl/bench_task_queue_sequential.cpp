@@ -16,8 +16,13 @@ namespace roc {
 namespace ctl {
 namespace {
 
+const core::nanoseconds_t MaxDelay = 100 * core::Millisecond;
+
 enum {
     NumScheduleIterations = 2000000,
+    NumScheduleAfterIterations = 20000,
+    NumThreads = 2,
+    BatchSize = 1000
 };
 
 class NoopExecutor : public ControlTaskExecutor<NoopExecutor> {
@@ -49,10 +54,11 @@ struct BM_QueueSequential : benchmark::Fixture {
 
 BENCHMARK_DEFINE_F(BM_QueueSequential, Schedule)(benchmark::State& state) {
     NoopExecutor::Task* tasks = new NoopExecutor::Task[NumScheduleIterations];
+    size_t n_task = 0;
 
-    while (state.KeepRunning()) {
-        for (int n = 0; n < NumScheduleIterations; n++) {
-            queue.schedule(tasks[n], executor, &completer);
+    while (state.KeepRunningBatch(BatchSize)) {
+        for (int n = 0; n < BatchSize; n++) {
+            queue.schedule(tasks[n_task++], executor, &completer);
         }
     }
 
@@ -64,6 +70,7 @@ BENCHMARK_DEFINE_F(BM_QueueSequential, Schedule)(benchmark::State& state) {
 }
 
 BENCHMARK_REGISTER_F(BM_QueueSequential, Schedule)
+    ->ThreadRange(1, NumThreads)
     ->Iterations(NumScheduleIterations)
     ->Unit(benchmark::kMicrosecond);
 
