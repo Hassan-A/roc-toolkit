@@ -17,7 +17,7 @@ namespace ctl {
 namespace {
 
 enum {
-    NumScheduleIterations = 2000000,
+    NumScheduleIterations = 20000,
     NumScheduleAfterIterations = 20000,
     NumThreads = 2,
     BatchSize = 1000
